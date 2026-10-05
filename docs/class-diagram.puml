@@ -110,41 +110,31 @@ package "service" <<service>> {
 }
 
 package "dao" <<dao>> {
+  abstract class "BaseDao<T>" as BaseDao {
+    # Dao<T, Integer> dao
+    # BaseDao(ConnectionSource, Class<T>)
+    + findAll() : List<T>
+    + findById(int) : T
+    + create(T) : void
+    + update(T) : void
+    + delete(T) : void
+    + <R> transaction(Callable<R>) : R
+  }
+
   class BookDao {
-    - Dao<Book, Integer> dao
     + BookDao(ConnectionSource)
-    + findAll() : List<Book>
-    + findById(int) : Book
-    + create(Book) : void
-    + update(Book) : void
-    + delete(Book) : void
   }
 
   class MemberDao {
-    - Dao<Member, Integer> dao
     + MemberDao(ConnectionSource)
-    + findAll() : List<Member>
-    + findById(int) : Member
-    + create(Member) : void
-    + update(Member) : void
   }
 
   class LoanDao {
-    - Dao<Loan, Integer> dao
     + LoanDao(ConnectionSource)
-    + findAll() : List<Loan>
-    + findById(int) : Loan
-    + create(Loan) : void
-    + update(Loan) : void
   }
 
   class ReservationDao {
-    - Dao<Reservation, Integer> dao
     + ReservationDao(ConnectionSource)
-    + findAll() : List<Reservation>
-    + findById(int) : Reservation
-    + create(Reservation) : void
-    + update(Reservation) : void
   }
 }
 
@@ -278,6 +268,12 @@ ReservationService "1" --> "1" LoanDao
 ' ----- service -> policy -----
 MemberService ..> LoanPolicy : <<uses>>
 ReservationService ..> LoanPolicy : <<uses>>
+
+' ----- dao inheritance -----
+BaseDao <|-- BookDao : T = Book
+BaseDao <|-- MemberDao : T = Member
+BaseDao <|-- LoanDao : T = Loan
+BaseDao <|-- ReservationDao : T = Reservation
 
 ' ----- dao -> model -----
 BookDao "1" --> "0..*" Book

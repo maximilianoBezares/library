@@ -28,6 +28,7 @@ public final class App {
     /**
      * The main method of the application.
      *
+     * @param args The command line arguments (not used).
      * @throws Exception in case of any error.
      */
     public static void main(String[] args) throws Exception {

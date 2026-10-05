@@ -14,22 +14,55 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * The service of the loans.
+ */
 public final class LoanService {
 
+    /**
+     * The loan period in days.
+     */
     public static final int DUE_DAYS = 21;
 
+    /**
+     * The loan DAO.
+     */
     private final LoanDao loanDao;
+
+    /**
+     * The book DAO.
+     */
     private final BookDao bookDao;
 
+    /**
+     * The Constructor.
+     *
+     * @param loanDao The loan DAO.
+     * @param bookDao The book DAO.
+     */
     public LoanService(LoanDao loanDao, BookDao bookDao) {
         this.loanDao = loanDao;
         this.bookDao = bookDao;
     }
 
+    /**
+     * Finds all the loans.
+     *
+     * @return The list of all the loans.
+     * @throws SQLException if the query fails.
+     */
     public List<Loan> findAll() throws SQLException {
         return loanDao.findAll();
     }
 
+    /**
+     * Returns a loan: marks it as returned, sets the overdue fee if it is late
+     * and puts the copy back into the inventory.
+     *
+     * @param loanId The ID of the loan.
+     * @return The loan, or null if it does not exist. An already returned loan is returned unchanged.
+     * @throws SQLException if a query or a write fails.
+     */
     public Loan returnLoan(int loanId) throws SQLException {
         Loan loan = loanDao.findById(loanId);
         if (loan == null || loan.isReturned()) {
@@ -61,6 +94,7 @@ public final class LoanService {
      * Find all overdue loans.
      *
      * @return a list of all overdue loans.
+     * @throws SQLException if the query fails.
      */
     public List<Loan> overdueLoans() throws SQLException {
         LocalDate today = LocalDate.now();

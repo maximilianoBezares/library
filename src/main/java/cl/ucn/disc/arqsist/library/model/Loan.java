@@ -88,6 +88,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the ID.
+     *
      * @return The ID.
      */
     public int getId() {
@@ -104,6 +106,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the member.
+     *
      * @return The member.
      */
     public Member getMember() {
@@ -120,6 +124,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the book.
+     *
      * @return The book.
      */
     public Book getBook() {
@@ -136,6 +142,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the loan date.
+     *
      * @return The loan date.
      */
     public LocalDate getLoanDate() {
@@ -152,6 +160,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the due date.
+     *
      * @return The due date.
      */
     public LocalDate getDueDate() {
@@ -168,6 +178,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the return date, or null if the loan is not returned.
+     *
      * @return The return date, or null if the loan is not returned.
      */
     public LocalDate getReturnDate() {
@@ -184,6 +196,8 @@ public final class Loan {
     }
 
     /**
+     * Checks if the loan is returned.
+     *
      * @return True if the loan is returned.
      */
     public boolean isReturned() {
@@ -200,6 +214,8 @@ public final class Loan {
     }
 
     /**
+     * Gets the overdue fee.
+     *
      * @return The overdue fee.
      */
     public double getOverdueFee() {

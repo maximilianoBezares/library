@@ -49,6 +49,8 @@ public final class Member {
     }
 
     /**
+     * Gets the ID.
+     *
      * @return The ID.
      */
     public int getId() {
@@ -65,6 +67,8 @@ public final class Member {
     }
 
     /**
+     * Gets the name.
+     *
      * @return The name.
      */
     public String getName() {
@@ -81,6 +85,8 @@ public final class Member {
     }
 
     /**
+     * Gets the email.
+     *
      * @return The email.
      */
     public String getEmail() {

@@ -50,6 +50,7 @@ public final class Database {
     }
 
     /**
+     * Gets the connection source of the database.
      *
      * @return The connection source for the database.
      */

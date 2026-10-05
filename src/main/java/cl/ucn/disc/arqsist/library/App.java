@@ -26,6 +26,13 @@ import io.javalin.http.staticfiles.Location;
 public final class App {
 
     /**
+     * Private constructor: this class only holds the main method and is never instantiated.
+     */
+    private App() {
+        // nothing here.
+    }
+
+    /**
      * The main method of the application.
      *
      * @param args The command line arguments (not used).

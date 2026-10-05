@@ -67,6 +67,8 @@ public final class Reservation {
     }
 
     /**
+     * Gets the ID.
+     *
      * @return The ID.
      */
     public int getId() {
@@ -83,6 +85,8 @@ public final class Reservation {
     }
 
     /**
+     * Gets the member.
+     *
      * @return The member.
      */
     public Member getMember() {
@@ -99,6 +103,8 @@ public final class Reservation {
     }
 
     /**
+     * Gets the book.
+     *
      * @return The book.
      */
     public Book getBook() {
@@ -115,6 +121,8 @@ public final class Reservation {
     }
 
     /**
+     * Gets the reservation date.
+     *
      * @return The reservation date.
      */
     public LocalDate getReservedAt() {
@@ -131,6 +139,8 @@ public final class Reservation {
     }
 
     /**
+     * Checks if the reservation is fulfilled.
+     *
      * @return True if the reservation is fulfilled.
      */
     public boolean isFulfilled() {

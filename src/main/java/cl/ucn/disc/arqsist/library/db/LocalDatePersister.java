@@ -23,6 +23,8 @@ public final class LocalDatePersister extends BaseDataType {
     private static final LocalDatePersister SINGLETON = new LocalDatePersister();
 
     /**
+     * Gets the singleton instance.
+     *
      * @return The singleton instance.
      */
     public static LocalDatePersister getSingleton() {

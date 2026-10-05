@@ -72,6 +72,8 @@ public final class Book {
     }
 
     /**
+     * Gets the ID.
+     *
      * @return The ID.
      */
     public int getId() {
@@ -88,6 +90,8 @@ public final class Book {
     }
 
     /**
+     * Gets the title.
+     *
      * @return The title.
      */
     public String getTitle() {
@@ -104,6 +108,8 @@ public final class Book {
     }
 
     /**
+     * Gets the author.
+     *
      * @return The author.
      */
     public String getAuthor() {
@@ -120,6 +126,8 @@ public final class Book {
     }
 
     /**
+     * Gets the ISBN.
+     *
      * @return The ISBN.
      */
     public String getIsbn() {
@@ -136,6 +144,8 @@ public final class Book {
     }
 
     /**
+     * Gets the total number of copies.
+     *
      * @return The total number of copies.
      */
     public int getTotalCopies() {
@@ -152,6 +162,8 @@ public final class Book {
     }
 
     /**
+     * Gets the number of available copies.
+     *
      * @return The number of available copies.
      */
     public int getAvailableCopies() {

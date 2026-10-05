@@ -7,7 +7,6 @@ package cl.ucn.disc.arqsist.library.service;
 import cl.ucn.disc.arqsist.library.dao.BookDao;
 import cl.ucn.disc.arqsist.library.model.Book;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -33,9 +32,8 @@ public final class BookService {
      * Lists all the books.
      *
      * @return The list of all the books.
-     * @throws SQLException if the query fails.
      */
-    public List<Book> listAll() throws SQLException {
+    public List<Book> listAll() {
         return dao.findAll();
     }
 
@@ -44,9 +42,8 @@ public final class BookService {
      *
      * @param id The ID of the book.
      * @return The book, or null if it does not exist.
-     * @throws SQLException if the query fails.
      */
-    public Book findById(int id) throws SQLException {
+    public Book findById(int id) {
         return dao.findById(id);
     }
 
@@ -55,9 +52,8 @@ public final class BookService {
      *
      * @param book The book to create.
      * @return The created book.
-     * @throws SQLException if the insert fails.
      */
-    public Book create(Book book) throws SQLException {
+    public Book create(Book book) {
         book.setAvailableCopies(book.getTotalCopies());
         dao.create(book);
         return book;
@@ -67,10 +63,17 @@ public final class BookService {
      * Takes one copy of a book out of the inventory.
      *
      * @param bookId The ID of the book.
-     * @throws SQLException if the query or the update fails.
+     * @throws NotFoundException     if the book does not exist.
+     * @throws IllegalStateException if the book has no available copies.
      */
-    public void borrow(int bookId) throws SQLException {
+    public void borrow(int bookId) {
         Book book = dao.findById(bookId);
+        if (book == null) {
+            throw new NotFoundException("Book not found: " + bookId);
+        }
+        if (book.getAvailableCopies() <= 0) {
+            throw new IllegalStateException("No available copies of book " + bookId);
+        }
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         dao.update(book);
     }
@@ -79,10 +82,13 @@ public final class BookService {
      * Puts one copy of a book back into the inventory.
      *
      * @param bookId The ID of the book.
-     * @throws SQLException if the query or the update fails.
+     * @throws NotFoundException if the book does not exist.
      */
-    public void returnCopy(int bookId) throws SQLException {
+    public void returnCopy(int bookId) {
         Book book = dao.findById(bookId);
+        if (book == null) {
+            throw new NotFoundException("Book not found: " + bookId);
+        }
         book.setAvailableCopies(book.getAvailableCopies() + 1);
         dao.update(book);
     }

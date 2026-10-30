@@ -30,15 +30,13 @@ hide stereotype
 package "controller" <<controller>> {
   class BookController {
     - BookService service
-    - BookDao dao
-    + BookController(BookService, BookDao)
+    + BookController(BookService)
     + register(JavalinConfig) : void
   }
 
   class LoanController {
-    - MemberService memberService
     - LoanService loanService
-    + LoanController(MemberService, LoanService)
+    + LoanController(LoanService)
     + register(JavalinConfig) : void
   }
 
@@ -67,13 +65,17 @@ package "service" <<service>> {
   }
 
   class LoanService {
-    + {static} int DUE_DAYS = 21
     - LoanDao loanDao
-    - BookDao bookDao
-    + LoanService(LoanDao, BookDao)
+    - MemberDao memberDao
+    - BookService bookService
+    - Clock clock
+    + LoanService(LoanDao, MemberDao, BookService, Clock)
     + findAll() : List<Loan>
+    + checkout(int, int) : Loan
     + returnLoan(int) : Loan
     + overdueLoans() : List<Loan>
+    - withAccruedFees(List<Loan>) : List<Loan>
+    - {static} accruedFee(Loan, LocalDate) : double
   }
 
   class LoanPolicy {
@@ -85,20 +87,18 @@ package "service" <<service>> {
 
   class MemberService {
     - MemberDao memberDao
-    - BookDao bookDao
-    - LoanDao loanDao
-    + MemberService(MemberDao, BookDao, LoanDao)
+    + MemberService(MemberDao)
     + register(Member) : Member
     + findAll() : List<Member>
-    + checkout(int, int) : Loan
   }
 
   class ReservationService {
     - ReservationDao reservationDao
-    - BookDao bookDao
     - MemberDao memberDao
     - LoanDao loanDao
-    + ReservationService(ReservationDao, BookDao, MemberDao, LoanDao)
+    - BookService bookService
+    - Clock clock
+    + ReservationService(ReservationDao, MemberDao, LoanDao, BookService, Clock)
     + reserve(int, int) : Reservation
     + findAll() : List<Reservation>
     + fulfill(int) : Loan
@@ -247,27 +247,31 @@ package "db" <<db>> {
 
 ' ----- controller -> service -----
 BookController "1" --> "1" BookService
-BookController "1" --> "1" BookDao
-LoanController "1" --> "1" MemberService
 LoanController "1" --> "1" LoanService
 MemberController "1" --> "1" MemberService
 ReservationController "1" --> "1" ReservationService
 
+' ----- service -> service -----
+LoanService "1" --> "1" BookService
+ReservationService "1" --> "1" BookService
+
 ' ----- service -> dao -----
 BookService "1" --> "1" BookDao
 LoanService "1" --> "1" LoanDao
-LoanService "1" --> "1" BookDao
+LoanService "1" --> "1" MemberDao
 MemberService "1" --> "1" MemberDao
-MemberService "1" --> "1" BookDao
-MemberService "1" --> "1" LoanDao
 ReservationService "1" --> "1" ReservationDao
-ReservationService "1" --> "1" BookDao
 ReservationService "1" --> "1" MemberDao
 ReservationService "1" --> "1" LoanDao
 
 ' ----- service -> policy -----
-MemberService ..> LoanPolicy : <<uses>>
+LoanService ..> LoanPolicy : <<uses>>
 ReservationService ..> LoanPolicy : <<uses>>
+
+' ----- service -> errors -----
+BookService ..> NotFoundException : <<throws>>
+LoanService ..> NotFoundException : <<throws>>
+ReservationService ..> NotFoundException : <<throws>>
 
 ' ----- dao inheritance -----
 BaseDao <|-- BookDao : T = Book

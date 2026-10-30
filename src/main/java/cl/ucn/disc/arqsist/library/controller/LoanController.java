@@ -5,20 +5,14 @@
 package cl.ucn.disc.arqsist.library.controller;
 
 import cl.ucn.disc.arqsist.library.service.LoanService;
-import cl.ucn.disc.arqsist.library.service.MemberService;
 import io.javalin.config.JavalinConfig;
 
 import java.util.Objects;
 
 /**
- * The HTTP controller of the loans.
+ * The HTTP controller of the loans. It only talks to the loan service.
  */
 public final class LoanController {
-
-    /**
-     * The member service.
-     */
-    private final MemberService memberService;
 
     /**
      * The loan service.
@@ -28,11 +22,9 @@ public final class LoanController {
     /**
      * The Constructor.
      *
-     * @param memberService The member service.
-     * @param loanService   The loan service.
+     * @param loanService The loan service.
      */
-    public LoanController(MemberService memberService, LoanService loanService) {
-        this.memberService = memberService;
+    public LoanController(LoanService loanService) {
         this.loanService = loanService;
     }
 
@@ -45,7 +37,7 @@ public final class LoanController {
         config.routes.post("/loans", ctx -> {
             int memberId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("memberId")));
             int bookId = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("bookId")));
-            ctx.json(memberService.checkout(memberId, bookId));
+            ctx.json(loanService.checkout(memberId, bookId));
         });
         config.routes.get("/loans", ctx -> ctx.json(loanService.findAll()));
         config.routes.post("/loans/{id}/return", ctx -> ctx.json(loanService.returnLoan(Integer.parseInt(ctx.pathParam("id")))));

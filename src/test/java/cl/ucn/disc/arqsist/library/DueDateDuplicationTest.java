@@ -13,20 +13,48 @@ import cl.ucn.disc.arqsist.library.model.Book;
 import cl.ucn.disc.arqsist.library.model.Loan;
 import cl.ucn.disc.arqsist.library.model.Member;
 import cl.ucn.disc.arqsist.library.model.Reservation;
-import cl.ucn.disc.arqsist.library.service.MemberService;
+import cl.ucn.disc.arqsist.library.service.BookService;
+import cl.ucn.disc.arqsist.library.service.LoanService;
 import cl.ucn.disc.arqsist.library.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Checks that checkout and fulfill give the same loan period (Error #5).
+ */
 class DueDateDuplicationTest {
 
-    private MemberService memberService;
+    /**
+     * The loan service.
+     */
+    private LoanService loanService;
+
+    /**
+     * The reservation service.
+     */
     private ReservationService reservationService;
+
+    /**
+     * The test book, with two copies: checkout and fulfill take one each.
+     */
     private Book book;
+
+    /**
+     * The test member.
+     */
     private Member member;
 
+    /**
+     * Creates an in-memory database, the services with a fixed clock, a book and a member.
+     *
+     * @throws Exception in case of any error.
+     */
     @BeforeEach
     void setUp() throws Exception {
         Database db = new Database("jdbc:sqlite::memory:");
@@ -35,18 +63,25 @@ class DueDateDuplicationTest {
         LoanDao loanDao = new LoanDao(db.connectionSource());
         ReservationDao reservationDao = new ReservationDao(db.connectionSource());
 
-        memberService = new MemberService(memberDao, bookDao, loanDao);
-        reservationService = new ReservationService(reservationDao, bookDao, memberDao, loanDao);
+        Clock clock = Clock.fixed(Instant.parse("2026-01-15T10:00:00Z"), ZoneOffset.UTC);
+        BookService bookService = new BookService(bookDao);
+        loanService = new LoanService(loanDao, memberDao, bookService, clock);
+        reservationService = new ReservationService(reservationDao, memberDao, loanDao, bookService, clock);
 
-        book = new Book("Design Patterns", "Gamma et al.", "9780201633610", 1);
+        book = new Book("Design Patterns", "Gamma et al.", "9780201633610", 2);
         bookDao.create(book);
         member = new Member("Grace Hopper", "grace@example.com");
         memberDao.create(member);
     }
 
+    /**
+     * The loan from checkout and the loan from fulfill have the same due date.
+     *
+     * @throws Exception in case of any error.
+     */
     @Test
     void checkoutAndFulfillUseTheSameLoanPeriod() throws Exception {
-        Loan fromCheckout = memberService.checkout(member.getId(), book.getId());
+        Loan fromCheckout = loanService.checkout(member.getId(), book.getId());
 
         Reservation reservation = reservationService.reserve(book.getId(), member.getId());
         Loan fromFulfill = reservationService.fulfill(reservation.getId());

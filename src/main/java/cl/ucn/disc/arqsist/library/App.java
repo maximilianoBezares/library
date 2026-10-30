@@ -16,14 +16,29 @@ import cl.ucn.disc.arqsist.library.db.Database;
 import cl.ucn.disc.arqsist.library.service.BookService;
 import cl.ucn.disc.arqsist.library.service.LoanService;
 import cl.ucn.disc.arqsist.library.service.MemberService;
+import cl.ucn.disc.arqsist.library.service.NotFoundException;
 import cl.ucn.disc.arqsist.library.service.ReservationService;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
+import io.javalin.json.JavalinJackson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Clock;
+import java.time.ZoneId;
+import java.util.Map;
 
 /**
- * The main class of the application.
+ * The main class of the application. It wires the DAOs, the services and the controllers,
+ * and starts the web server.
  */
 public final class App {
+
+    /**
+     * The logger.
+     */
+    private static final Logger log = LoggerFactory.getLogger(App.class);
 
     /**
      * Private constructor: this class only holds the main method and is never instantiated.
@@ -39,25 +54,37 @@ public final class App {
      * @throws Exception in case of any error.
      */
     public static void main(String[] args) throws Exception {
-        Database db = new Database("jdbc:sqlite:database.sqlite");
+        log.info("Connecting to the database");
+        Database db = new Database("jdbc:sqlite:database.db");
+        log.info("Seeding the database if it is empty");
         db.seedIfEmpty();
 
+        log.info("Creating the clock");
+        Clock clock = Clock.system(ZoneId.of("America/Santiago"));
+
+        log.info("Creating the DAOs");
         BookDao bookDao = new BookDao(db.connectionSource());
         MemberDao memberDao = new MemberDao(db.connectionSource());
         LoanDao loanDao = new LoanDao(db.connectionSource());
         ReservationDao reservationDao = new ReservationDao(db.connectionSource());
 
+        log.info("Creating the services");
         BookService bookService = new BookService(bookDao);
-        MemberService memberService = new MemberService(memberDao, bookDao, loanDao);
-        LoanService loanService = new LoanService(loanDao, bookDao);
-        ReservationService reservationService = new ReservationService(reservationDao, bookDao, memberDao, loanDao);
+        MemberService memberService = new MemberService(memberDao);
+        LoanService loanService = new LoanService(loanDao, memberDao, bookService, clock);
+        ReservationService reservationService = new ReservationService(reservationDao, memberDao, loanDao, bookService, clock);
 
-        BookController bookController = new BookController(bookService, bookDao);
+        log.info("Creating the controllers");
+        BookController bookController = new BookController(bookService);
         MemberController memberController = new MemberController(memberService);
-        LoanController loanController = new LoanController(memberService, loanService);
+        LoanController loanController = new LoanController(loanService);
         ReservationController reservationController = new ReservationController(reservationService);
 
-        Javalin.create(config -> {
+        log.info("Starting the server");
+        Javalin app = Javalin.create(config -> {
+            // Write the LocalDate values as ISO strings, not as arrays of numbers
+            config.jsonMapper(new JavalinJackson().updateMapper(mapper ->
+                    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)));
             config.staticFiles.add(staticFiles -> {
                 staticFiles.hostedPath = "/";
                 staticFiles.directory = "/public";
@@ -67,6 +94,16 @@ public final class App {
             memberController.register(config);
             loanController.register(config);
             reservationController.register(config);
-        }).start(7070);
+
+            // Map the domain errors to the HTTP status codes
+            config.routes.exception(NotFoundException.class, (e, ctx) ->
+                    ctx.status(404).json(Map.of("error", e.getMessage())));
+            config.routes.exception(IllegalArgumentException.class, (e, ctx) ->
+                    ctx.status(400).json(Map.of("error", e.getMessage())));
+            config.routes.exception(IllegalStateException.class, (e, ctx) ->
+                    ctx.status(409).json(Map.of("error", e.getMessage())));
+        });
+        app.start(7070);
+        log.info("Server started on port 7070");
     }
 }

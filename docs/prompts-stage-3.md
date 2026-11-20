@@ -1,0 +1,5 @@
+# Prompt log: Stage 3
+
+| Number | Model | Exact prompt text | Files changed |
+| ------ | ----- | ----------------- | ------------- |
+| 1 | gpt-6.2-sol | Lee `refactor.stage-3.pdf` y aplica el cambio 1 del Stage 3 (sección 2.2, Build configuration). Reemplaza por completo el contenido de `build.gradle` con el listado de esa sección, respetando las versiones, los comentarios y el orden de los bloques. Ejecuta `.\gradlew.bat build` e indica el resultado. Si falla, reporta el error sin modificar otros archivos para corregirlo. Crea `docs/prompts-stage-3.md` con el formato indicado en la pauta y registra este prompt de forma literal como la entrada 1, indicando el modelo usado y los archivos modificados. Limita los cambios a `build.gradle` y `docs/prompts-stage-3.md`.  | `build.gradle`, `docs/prompts-stage-3.md` |

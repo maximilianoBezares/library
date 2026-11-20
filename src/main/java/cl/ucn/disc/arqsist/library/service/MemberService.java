@@ -47,4 +47,35 @@ public final class MemberService {
     public List<Member> findAll() {
         return memberDao.findAll();
     }
+
+    /**
+     * Find a member by ID.
+     *
+     * @param id the member ID
+     * @return the member
+     * @throws NotFoundException if the member does not exist
+     */
+    public Member findById(int id) {
+        // ORMLite returns null when the row does not exist.
+        Member member = memberDao.findById(id);
+        if (member == null) {
+            throw new NotFoundException("Member not found: " + id);
+        }
+        return member;
+    }
+
+    /**
+     * Searches for members by a nonblank name fragment.
+     *
+     * @param query the name fragment, which may have surrounding whitespace
+     * @return matching members ordered by ID
+     * @throws IllegalArgumentException if the query is blank
+     */
+    public List<Member> search(String query) {
+        String fragment = query.strip();
+        if (fragment.isEmpty()) {
+            throw new IllegalArgumentException("Search query must not be blank");
+        }
+        return memberDao.searchByName(fragment);
+    }
 }
